@@ -44,25 +44,26 @@ def main(mapfn):
             errors.append((name, e))
 
     print("{} total errors: ".format(len(errors)))
-    
+
     notfounderrors = [e for e in errors if type(e[1]) == FileNotFoundError]
     print("{} not found".format(len(notfounderrors)))
-    # print(notfounderrors[0])
+    for e in notfounderrors:
+        print("{}: {}".format(e[0], e[1].args[0]))
 
     typeerrors = [e for e in errors if type(e[1]) == TypeError]
     print("{} type errors".format(len(typeerrors)))
-    for e in typeerrors: print("{}: {}".format(e[0], e[1].args[0]))
+    for e in typeerrors:
+        print("{}: {}".format(e[0], e[1].args[0]))
 
     formaterrors = [e for e in errors if type(e[1]) == FormatError]
     print("{} format errors".format(len(formaterrors)))
-    for e in formaterrors: print("{}: {}".format(e[0], e[1].args[0]))
+    for e in formaterrors:
+        print("{}: {}".format(e[0], e[1].args[0]))
 
 if __name__ == '__main__':
     tryall = None
 
     dbc_folder = "."
-    # print(dbc_folder)
-    # exit(1)
 
     try:
         mapfn = argv[1]
