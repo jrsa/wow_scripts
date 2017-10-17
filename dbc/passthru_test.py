@@ -10,31 +10,31 @@ specify the path to all the dbc files below
 
 import logging
 
-from os.path import join
-from sys import argv
+from os.path import join, basename
+from sys import argv, exit
 
 from wow.simple_file import load, save
 from wow.dbc import DbcFile, FormatError
 from wow.dbc.format_import import FormatImport
 
-DBC_DIRECTORY = "/Users/jrsa/wow/wowassets/wotlk/dbc"
-
-formats = FormatImport()
+dbc_folder = None
+formats = None
 
 
 def test(name):
-    fullpath = join(DBC_DIRECTORY, name + ".dbc")
+    fullpath = join(dbc_folder, name + ".dbc")
     f = load(fullpath)
 
     inst = DbcFile(formats.get_format(name))
     inst.load(f)
 
-    output_path = join(DBC_DIRECTORY, "testoutput", name + ".dbc")
+    output_path = join(dbc_folder, "testoutput", name + ".dbc")
     save(output_path, inst.save())
 
 
-def main():
+def main(mapfn):
     errors = []
+    formats = FormatImport(mapfn)
     for entry in formats.root.getchildren():
         name = entry.attrib['Name']
         try:
@@ -46,6 +46,7 @@ def main():
     
     notfounderrors = [e for e in errors if type(e[1]) == FileNotFoundError]
     print("{} not found".format(len(notfounderrors)))
+    # print(notfounderrors[0])
 
     typeerrors = [e for e in errors if type(e[1]) == TypeError]
     print("{} type errors".format(len(typeerrors)))
@@ -57,13 +58,24 @@ def main():
 
 if __name__ == '__main__':
     tryall = None
+
+    dbc_folder = "."
+    # print(dbc_folder)
+    # exit(1)
+
     try:
-        name = argv[1]
+        mapfn = argv[1]
+    except IndexError as e:
+        print("usage: {} <xml definition> [dbc filename]".format(argv[0]))
+        exit(1)
+
+    try:
+        name = argv[2]
         tryall = False
     except IndexError:
         tryall = True
 
     if tryall:
-        main()
+        main(mapfn)
     else:
         test(name)

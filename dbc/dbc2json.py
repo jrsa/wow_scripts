@@ -12,10 +12,16 @@ import wow.simple_file as sfile
 from wow.dbc import DbcFile
 from wow.dbc.format_import import FormatImport
 
-fn = sys.argv[1]
+try:
+	fn = sys.argv[1]
+	map_fn = sys.argv[2]
+except IndexError as e:
+	print("usage: {} <dbc filename> <xml definition filename>".format(sys.argv[0]))
+	sys.exit(1)
+
 f = sfile.load(fn)
 
-rec_format = FormatImport().get_format(os.path.basename(fn))
+rec_format = FormatImport(map_fn).get_format(os.path.basename(fn))
 inst = DbcFile(rec_format)
 inst.load(f)
 
