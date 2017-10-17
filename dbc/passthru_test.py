@@ -33,6 +33,7 @@ def test(name):
 
 
 def main(mapfn):
+    global formats
     errors = []
     formats = FormatImport(mapfn)
     for entry in formats.root.getchildren():
