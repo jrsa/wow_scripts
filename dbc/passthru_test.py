@@ -12,30 +12,30 @@ import logging
 
 from os.path import join, basename
 from sys import argv, exit
+from optparse import OptionParser
+
 
 from wow.simple_file import load, save
 from wow.dbc import DbcFile, FormatError
 from wow.dbc.format_import import FormatImport
 
-dbc_folder = None
+options = None
 formats = None
 
 
 def test(name):
-    fullpath = join(dbc_folder, name + ".dbc")
+    fullpath = join(options.in_dir, name + ".dbc")
     f = load(fullpath)
 
     inst = DbcFile(formats.get_format(name))
     inst.load(f)
 
-    output_path = join(dbc_folder, "testoutput", name + ".dbc")
+    output_path = join(options.out_dir, name + ".dbc")
     save(output_path, inst.save())
 
 
-def main(mapfn):
-    global formats
+def main():
     errors = []
-    formats = FormatImport(mapfn)
     for entry in formats.root.getchildren():
         name = entry.attrib['Name']
         try:
@@ -61,23 +61,24 @@ def main(mapfn):
         print("{}: {}".format(e[0], e[1].args[0]))
 
 if __name__ == '__main__':
-    tryall = None
 
-    dbc_folder = "."
+    parser = OptionParser()
+    
+    parser.add_option('-b', '--batch', dest='batch', default=False, help='process all files in the input directory', action='store_true')
+    parser.add_option('-v', '--verbose', dest='verbose', default=False, help='Enable Verbose Output.', action='store_true')
 
-    try:
-        mapfn = argv[1]
-    except IndexError as e:
-        print("usage: {} <xml definition> [dbc filename]".format(argv[0]))
-        exit(1)
+    parser.add_option('-n', '--name', dest='filename', help='name of a single dbc file (without extension) to process')
+    parser.add_option('-d', '--def', dest='mapfn', help='path to the definition file')
+    parser.add_option('-i', '--input', dest='in_dir', default='.', help='directory containing dbc files to process')
+    parser.add_option('-o', '--output', dest='out_dir', default='./output/', help='directory in which processed files will be saved')
+    
+    global options
+    (options, args) = parser.parse_args()
 
-    try:
-        name = argv[2]
-        tryall = False
-    except IndexError:
-        tryall = True
-
-    if tryall:
-        main(mapfn)
+    print(options.mapfn)
+    formats = FormatImport(options.mapfn)
+    
+    if options.batch:
+        main()
     else:
-        test(name)
+        test(options.name)
