@@ -11,9 +11,11 @@ GAME_ROOT = "/Users/jrsa/wow/wowassets/wotlk"
 MAPS_ROOT = "World/Maps/"
 DBC_ROOT = "dbc/"
 
+# harder mode: resolve dual results for root area, i.e., for instanced dungeons
+# harder mode 2: resolve area's which are only present in WMO's
 
 def usage():
-    print("usage: {} <map name> <area name>".format(sys.argv[0]))
+    print("usage: {} <area name>".format(sys.argv[0]))
 
 
 def get_areas_for_name(name):
@@ -25,14 +27,17 @@ def get_areas_for_name(name):
     ids = []
 
     parent_id = 0
+    map_id = None
     names = dict()
 
     # find parent (exact match for name argument)
     for r in areatable.records:
         if r[11] == name:
+            map_id = r[1]
             parent_id = r[0]
             ids.append(parent_id)
             names[parent_id] = r[11]
+            break
 
     # find children
     if parent_id != 0:
@@ -41,43 +46,58 @@ def get_areas_for_name(name):
                 ids.append(r[0])
                 names[r[0]] = r[11]
 
-    return ids, names
+    return ids, names, map_id
+
+
+def get_map_dir_for_id(mapid):
+    mapdb = dbc.DbcFile(dbc.format_import.FormatImport().get_format("Map"))
+    mapdb.load(load(os.path.join(GAME_ROOT, DBC_ROOT, 'Map.dbc')))
+
+    for r in mapdb.records:
+        if r[0] == mapid:
+            return r[1]
+
+    print("map not found for id ", mapid)
+    return
 
 
 def main():
     matches = []
 
-    wdt_filename = "{name}/{name}.wdt".format(name=sys.argv[1])
-    wdt = Wdt()
-    wdt.read(load(os.path.join(GAME_ROOT, MAPS_ROOT, wdt_filename)))
-
     try:
-        area_to_find = sys.argv[2]
+        area_to_find = sys.argv[1]
     except IndexError as e:
         usage()
         sys.exit(-1)
 
-    area_ids_to_find, names_by_id = get_areas_for_name(area_to_find)
+    area_ids_to_find, names_by_id, map_id = get_areas_for_name(area_to_find)
+    if map_id is None:
+        return
+
+    map_name = get_map_dir_for_id(map_id)
+
+    print("{} is on the map: {}".format(area_to_find, map_name))
+
+    wdt_filename = "{name}/{name}.wdt".format(name=map_name)
+    wdt = Wdt()
+    wdt.read(load(os.path.join(GAME_ROOT, MAPS_ROOT, wdt_filename)))
 
     if len(wdt.extant_tiles):
         for i, j in wdt.extant_tiles:
-            tile_fn = "{name}/{name}_{x}_{y}.adt".format(name=sys.argv[1], x=i, y=j)
+            tile_fn = "{name}/{name}_{x}_{y}.adt".format(name=map_name, x=i, y=j)
             tile_fullpath = os.path.join(GAME_ROOT, MAPS_ROOT, tile_fn)
-            if os.path.exists(tile_fullpath):
-                a = adt.AdtFile()
-                a.load(load(tile_fullpath))
-                for c in a.chunks:
-                    if c.areaId in area_ids_to_find:
-                        if (((i, j), c.areaId)) not in matches:
-                            matches.append(((i, j), c.areaId))
-            else:
-                print("ERROR: {} doesnt exist".format(tile_fn))
+            a = adt.AdtFile()
+            a.load(load(tile_fullpath))
+            for c in a.chunks:
+                if c.areaId in area_ids_to_find and (((i, j), c.areaId)) not in matches:
+                        matches.append(((i, j), c.areaId))
 
         for tile in matches:
-            print("tile {} contains {}".format(tile[0], names_by_id[tile[1]]))
+            tile_fn = "{name}_{x}_{y}.adt".format(name=map_name, x=tile[0][0], y=tile[0][1])
+            print("{} contains {}".format(tile_fn, names_by_id[tile[1]]))
 
     elif len(wdt.object_filename):
-        print("no map tiles found, only global wmo: {}", wdt.object_filename)
+        print("no map tiles found, only global wmo: ", wdt.object_filename)
 
     else:
         print("invalid wdt file (what the fuck)")
