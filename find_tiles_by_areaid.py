@@ -3,6 +3,8 @@
 import sys
 import os.path
 
+from collections import namedtuple
+
 from wow import adt, dbc
 from wow.wdt import Wdt
 from wow.simple_file import load
@@ -62,6 +64,8 @@ def get_map_dir_for_id(mapid):
 
 
 def main():
+    TileEntry = namedtuple('TileEntry', ['x', 'y', 'areaid'])
+
     matches = []
 
     try:
@@ -89,12 +93,12 @@ def main():
             a = adt.AdtFile()
             a.load(load(tile_fullpath))
             for c in a.chunks:
-                if c.areaId in area_ids_to_find and (((i, j), c.areaId)) not in matches:
-                        matches.append(((i, j), c.areaId))
+                if c.areaId in area_ids_to_find and TileEntry(i, j, c.areaId) not in matches:
+                    matches.append(TileEntry(i, j, c.areaId))
 
-        for tile in matches:
-            tile_fn = "{name}_{x}_{y}.adt".format(name=map_name, x=tile[0][0], y=tile[0][1])
-            print("{} contains {}".format(tile_fn, names_by_id[tile[1]]))
+        for entry in matches:
+            tile_fn = "{name}_{x}_{y}.adt".format(name=map_name, x=entry.x, y=entry.y)
+            print("{} contains {}".format(tile_fn, names_by_id[entry.areaid]))
 
     elif len(wdt.object_filename):
         print("no map tiles found, only global wmo: ", wdt.object_filename)
