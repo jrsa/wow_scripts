@@ -1,4 +1,4 @@
-from memory import Memory
+from mem import Memory
 import sys
 
 

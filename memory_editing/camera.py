@@ -1,12 +1,11 @@
-import memory
+import mem
 import struct
 import sys
 
+from offsets import OFFSETS
 
-OFFSETS = {'CGCamera::m_fov': 64,
-           's_currentWorldFrame': 11672552,
-           'CGWorldFrame::m_camera': 26060
-           }
+BUILD_NUMBER = 5875
+OFFSETS = OFFSETS[BUILD_NUMBER]
  
 class WowCamera(object):
 
@@ -16,13 +15,11 @@ class WowCamera(object):
     def update_camera_address(self):
         pWorldFrame = self.mem.read('I', OFFSETS['s_currentWorldFrame'])
         if not pWorldFrame:
-            print("static worldFrame null!")
-            return
+            raise RuntimeError("static worldFrame null!")
 
         pCamera = self.mem.read('I', pWorldFrame + OFFSETS['CGWorldFrame::m_camera'])
         if not pCamera:
-            print("worldFrame m_camera null!")
-            return
+            raise RuntimeError("worldFrame m_camera null!")
 
         self.pcam = pCamera
 
@@ -36,12 +33,19 @@ class WowCamera(object):
 
 
 def main():
-    m = memory.Memory(int(sys.argv[1]))
+    m = mem.Memory(int(sys.argv[1]))
     cam = WowCamera(m)
+
+    # cam.update_camera_address()
 
     while True:
         print("current fov is ", cam.get_fov(), " change?")
         cam.set_fov(float(input()))
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except RuntimeError as e:
+        print(e)
+    except (EOFError, KeyboardInterrupt) as e:
+        print("goodbye")
