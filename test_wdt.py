@@ -21,6 +21,8 @@ if len(wdt.extant_tiles):
         tile_fn = maps_root + "{name}/{name}_{x}_{y}.adt".format(name=sys.argv[1], x=i, y=j)
         if os.path.exists(tile_fn):
             print("adt found for", i, j)
+        else:
+            print("error: no adt file found for", i, j)
 
 elif len(wdt.object_filename):
     print("found object file", wdt.object_filename)
