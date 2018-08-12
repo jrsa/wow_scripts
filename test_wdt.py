@@ -6,19 +6,22 @@ import os.path
 from wow.wdt import Wdt
 from wow.simple_file import load
 
-maps_root = "/Users/jrsa/wow/12340/Data/World/Maps/"
-wdt_filename = "{name}/{name}.wdt".format(name=sys.argv[1])
+mapname = sys.argv[1]
+
+data_root = "/Users/jrsa/wow/wowassets/wotlk/"
+maps_root = os.path.join(data_root, 'World/Maps/')
+wdt_filename = f"{mapname}/{mapname}.wdt"
 
 wdt = Wdt()
-wdt.read(load(maps_root + wdt_filename))
+wdt.read(load(os.path.join(maps_root, wdt_filename)))
 
 print("read wdt file, version=", wdt.version)
 
 if len(wdt.extant_tiles):
-    print("found {n} tiles".format(n=len(wdt.extant_tiles)))
+    print(f"found {len(wdt.extant_tiles)} tiles")
 
     for i, j in wdt.extant_tiles:
-        tile_fn = maps_root + "{name}/{name}_{x}_{y}.adt".format(name=sys.argv[1], x=i, y=j)
+        tile_fn = os.path.join(maps_root, f"{mapname}/{mapname}_{i}_{j}.adt")
         if os.path.exists(tile_fn):
             print("adt found for", i, j)
         else:
