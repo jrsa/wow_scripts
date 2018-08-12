@@ -38,7 +38,7 @@ def test(name):
 def main():
     errors = []
     for entry in formats.root.getchildren():
-        name = entry.attrib['Name']
+        name = entry.tag
         try:
             test(name)
         except Exception as e:
