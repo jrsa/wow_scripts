@@ -63,9 +63,6 @@ if __name__ == '__main__':
 
     parser = OptionParser()
     
-    parser.add_option('-b', '--batch', dest='batch', default=False, help='process all files in the input directory', action='store_true')
-    parser.add_option('-v', '--verbose', dest='verbose', default=False, help='Enable Verbose Output.', action='store_true')
-
     parser.add_option('-n', '--name', dest='filename', help='name of a single dbc file (without extension) to process')
     parser.add_option('-d', '--def', dest='mapfn', help='path to the definition file')
     parser.add_option('-i', '--input', dest='in_dir', default='.', help='directory containing dbc files to process')
@@ -78,7 +75,7 @@ if __name__ == '__main__':
     else:
         formats = FormatImport()
 
-    if options.batch:
+    if options.filename is None:
         main(options, formats)
     else:
         test(options, formats)
