@@ -19,6 +19,7 @@ from wow.simple_file import load, save
 from wow.dbc import DbcFile, FormatError
 from wow.dbc.format_import import FormatImport
 
+global options
 options = None
 formats = None
 
@@ -72,7 +73,6 @@ if __name__ == '__main__':
     parser.add_option('-i', '--input', dest='in_dir', default='.', help='directory containing dbc files to process')
     parser.add_option('-o', '--output', dest='out_dir', default='./output/', help='directory in which processed files will be saved')
     
-    global options
     (options, args) = parser.parse_args()
 
     print(options.mapfn)
