@@ -19,28 +19,26 @@ from wow.simple_file import load, save
 from wow.dbc import DbcFile, FormatError
 from wow.dbc.format_import import FormatImport
 
-global options
-options = None
-formats = None
 
-
-def test(name):
-    fullpath = join(options.in_dir, name + ".dbc")
+def test(opts, formatter):
+    fullpath = join(opts.in_dir, opts.filename + ".dbc")
     f = load(fullpath)
 
-    inst = DbcFile(formats.get_format(name))
+    inst = DbcFile(formatter.get_format(opts.filename))
     inst.load(f)
 
-    output_path = join(options.out_dir, name + ".dbc")
+    output_path = join(opts.out_dir, opts.filename + ".dbc")
     save(output_path, inst.save())
 
 
-def main():
+def main(opts, formatter):
     errors = []
-    for entry in formats.root.getchildren():
+
+    for entry in formatter.root.getchildren():
         name = entry.tag
+        opts.filename = name
         try:
-            test(name)
+            test(opts, formatter)
         except Exception as e:
             errors.append((name, e))
 
@@ -75,10 +73,12 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()
 
-    print(options.mapfn)
-    formats = FormatImport(options.mapfn)
-    
-    if options.batch:
-        main()
+    if options.mapfn:
+        formats = FormatImport(options.mapfn)
     else:
-        test(options.name)
+        formats = FormatImport()
+
+    if options.batch:
+        main(options, formats)
+    else:
+        test(options, formats)
