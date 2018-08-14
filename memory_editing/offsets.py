@@ -12,5 +12,8 @@ OFFSETS = {
         #
         's_curMgr': 0x99066c,
 
+    },
+    12340: {
+        'debug_enable': 0xDA2FA8,
     }
 }
