@@ -34,19 +34,19 @@ def get_areas_for_name(name):
 
     # find parent (exact match for name argument)
     for r in areatable.records:
-        if r[11] == name:
-            map_id = r[1]
-            parent_id = r[0]
+        if r.Name1 == name:
+            map_id = r.Map
+            parent_id = r.ID
             ids.append(parent_id)
-            names[parent_id] = r[11]
+            names[parent_id] = r.Name1
             break
 
     # find children
     if parent_id != 0:
         for r in areatable.records:
-            if r[2] == parent_id:
-                ids.append(r[0])
-                names[r[0]] = r[11]
+            if r.Zone == parent_id:
+                ids.append(r.ID)
+                names[r.ID] = r.Name1
 
     return ids, names, map_id
 
