@@ -44,20 +44,11 @@ def main(opts, formatter):
 
     print("{} total errors: ".format(len(errors)))
 
-    notfounderrors = [e for e in errors if type(e[1]) == FileNotFoundError]
-    print("{} not found".format(len(notfounderrors)))
-    for e in notfounderrors:
-        print("{}: {}".format(e[0], e[1].args[0]))
+    errors = sorted(errors, key=lambda e: type(e[1]).__name__)
 
-    typeerrors = [e for e in errors if type(e[1]) == TypeError]
-    print("{} type errors".format(len(typeerrors)))
-    for e in typeerrors:
-        print("{}: {}".format(e[0], e[1].args[0]))
+    for file, error in errors:
+        print(f'{file}: {error}')
 
-    formaterrors = [e for e in errors if type(e[1]) == FormatError]
-    print("{} format errors".format(len(formaterrors)))
-    for e in formaterrors:
-        print("{}: {}".format(e[0], e[1].args[0]))
 
 if __name__ == '__main__':
 
