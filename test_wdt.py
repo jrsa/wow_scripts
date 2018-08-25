@@ -27,9 +27,10 @@ if len(wdt.extant_tiles):
         else:
             print("error: no adt file found for", i, j)
 
-elif len(wdt.object_filename):
-    wmo_path = join(data_root, sep.join(wdt.object_filename.decode('utf-8').split('\\')))
+elif wdt.object_filename:
+    wmo_path = join(data_root, sep.join(wdt.object_filename.split('\\')))
     if exists(wmo_path):
+        print(wdt.obj)
         print("found object file on disk: ", wmo_path)
 
 else:
